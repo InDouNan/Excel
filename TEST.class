@@ -1,0 +1,106 @@
+import com.example.demo.domain.baoming;
+import com.example.demo.domain.baomingRepository;
+import com.example.demo.email.sendEmailExcel;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.UUID;
+@Service
+
+public class Test {
+    @Autowired
+    private baomingRepository baomingRepository;
+    private baoming baoming = new baoming();
+
+    public String testExcel(String blogid) throws Exception {
+
+        List<String[]> columNames = new ArrayList<String[]>();
+        columNames.add(new String[]{"求职职位", "姓名", "性别",
+                "年龄", "毕业院校", "学历", "期望工作地点", "工作经验",
+                "期望资薪", "手机",
+                "邮箱", "投递时间", "自我描述"});
+
+        List<String[]> fieldNames = new ArrayList<String[]>();
+        fieldNames.add(new String[]{"job", "name", "sex", "age",
+                "institutions", "degree", "region", "work", "salary",
+                "phone", "email"
+                , "date", "selfIntroduction"});
+
+        LinkedHashMap<String, List<?>> map = new LinkedHashMap<String, List<?>>();
+        map.put("运单月报", getData1(blogid));
+
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+
+        ExcelUtil.ExcelExportData setInfo = new ExcelUtil.ExcelExportData();
+        setInfo.setDataMap(map);
+        setInfo.setFieldNames(fieldNames);
+        setInfo.setTitles(new String[]{"报表1"});
+        setInfo.setColumnNames(columNames);
+        String uploadpath = "C:/Users/apache-tomcat-9.0.0.M20/webapps/ROOT/" + "excel/" + blogid + ".xls";
+        // 将需要导出的数据输出到文件
+        System.out.println(ExcelUtil.export2File(setInfo, uploadpath));
+
+        String url = "/excel/" + uuid + blogid + ".xls";
+        return url;
+    }
+
+    public void testExcel2(String email) throws Exception {
+
+        List<String[]> columNames = new ArrayList<String[]>();
+        columNames.add(new String[]{"求职职位", "姓名", "性别", "年龄", "毕业院校", "学历", "期望工作地点", "工作经验", "期望资薪", "手机",
+                "邮箱", "投递时间", "自我描述"});
+
+
+        List<String[]> fieldNames = new ArrayList<String[]>();
+        fieldNames.add(new String[]{"job", "name", "sex", "age", "institutions", "degree", "region", "work", "salary", "phone", "email"
+                , "date", "selfIntroduction"});
+
+
+        LinkedHashMap<String, List<?>> map = new LinkedHashMap<String, List<?>>();
+        map.put("运单月报", getData2());
+
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+
+        ExcelUtil.ExcelExportData setInfo = new ExcelUtil.ExcelExportData();
+        setInfo.setDataMap(map);
+        setInfo.setFieldNames(fieldNames);
+        setInfo.setTitles(new String[]{"报表1"});
+        setInfo.setColumnNames(columNames);
+        String uploadpath = "C:/ALLEXCEL/" + "allperson" + ".xls";
+        // 将需要导出的数据输出到文件
+        System.out.println(ExcelUtil.export2File(setInfo, uploadpath));
+        sendEmailExcel r = new sendEmailExcel(uploadpath,email,"allperson");
+        r.send();
+        String url = "/excel/" + uuid +  ".xls";
+
+    }
+    private List<baoming> getData1(String blogid) {
+        List<baoming> data = new ArrayList<baoming>();
+
+        try {
+
+
+            data = baomingRepository.findByBaomingidExcel("success", blogid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    private List<baoming> getData2() {
+        List<baoming> data = new ArrayList<baoming>();
+
+        try {
+
+
+            data = baomingRepository.findByBaomingidExcel2("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+}
